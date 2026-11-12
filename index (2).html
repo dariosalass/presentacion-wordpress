@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comenzar a trabajar con WordPress · UT04 4.4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15120F; --bg2:#201B17; --line:#3B342D; --paper:#F4ECDD; --soft:#D9CFBF; --mut:#A99F91;
+  --or:#FF7A1A; --sky:#5CC8FF; --ok:#3FD07F; --bad:#FF5A55; --warn:#FFC857;
+  --wpd:#1D2327; --wpd2:#2C3338; --wpb:#2271B1; --wpbg:#F0F0F1; --wpt:#1D2327; --wpr:#D63638; --wpg:#00A32A;
+  --disp:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --mono:"Red Hat Mono",ui-monospace,Consolas,monospace;
+  --ui:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0C0A08;overflow:hidden;color:var(--paper);font-family:var(--disp)}
+body{-webkit-font-smoothing:antialiased}
+.fit{position:relative;width:100%;height:100%}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;background:var(--bg);overflow:hidden;
+  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center;font-variation-settings:"opsz" 48}
+.a{position:absolute}
+.slide{position:absolute;inset:0;display:none}
+.slide.on{display:block}
+code,.mono{font-family:var(--mono);font-weight:500}
+
+/* ===== tipografía ===== */
+.t{position:absolute;left:140px;top:136px;font-size:78px;line-height:1.02;font-weight:800;letter-spacing:-.03em;font-variation-settings:"opsz" 96}
+.t.two{font-size:70px}
+.lead{font-size:30px;line-height:1.4;color:var(--mut)}
+.h3{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.p{font-size:29px;line-height:1.4;color:var(--soft)}
+.or{color:var(--or)} .sky{color:var(--sky)} .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)} .mut{color:var(--mut)}
+.pill{display:inline-block;border-radius:999px;padding:6px 20px;font-size:26px;font-weight:700}
+
+/* ===== animaciones de entrada ===== */
+.h{clip-path:inset(-20% 105% -20% -5%)}
+.on .h{animation:hin .95s cubic-bezier(.2,.8,.2,1) var(--d,.4s) forwards}
+@keyframes hin{to{clip-path:inset(-20% -5% -20% -5%)}}
+.r{opacity:0;filter:blur(8px)}
+.on .r{animation:rin .75s ease var(--d,.9s) forwards}
+@keyframes rin{to{opacity:1;filter:blur(0)}}
+.q{opacity:0;transition:opacity .5s ease}
+.q.show{opacity:1}
+.caret::after{content:"";display:inline-block;width:.09em;height:1em;background:currentColor;margin-left:3px;vertical-align:-.12em;animation:bl .8s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+
+/* ===== marco: cinta, pie, transición ===== */
+.tape{position:absolute;left:140px;right:140px;top:48px;display:flex;gap:16px;transition:opacity .4s}
+.tape .seg{flex:1}
+.tape i{display:block;height:6px;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+.tape i::after{content:"";position:absolute;inset:0;background:var(--or);transform:scaleX(0);transform-origin:left;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.tape .seg.act i::after{transform:scaleX(1)}
+.tape .seg.done i::after{transform:scaleX(1);background:#6B5A48}
+.tape span{display:block;margin-top:10px;font-size:23px;font-weight:600;color:#6E655A;letter-spacing:0}
+.tape .seg.act span{color:var(--paper)}
+.foot{position:absolute;left:140px;right:140px;bottom:34px;display:flex;justify-content:space-between;font-size:23px;color:#756B5F;transition:opacity .4s}
+.stage.nochrome .tape,.stage.nochrome .foot{opacity:0}
+.wipe{position:absolute;inset:0;background:var(--or);transform:translateX(-101%);z-index:50;pointer-events:none;display:flex;align-items:center;padding-left:140px}
+.wipe b{font-size:340px;font-weight:800;letter-spacing:-.05em;color:var(--bg);opacity:.92}
+.wipe.in{transition:transform .5s cubic-bezier(.75,0,.2,1);transform:translateX(0)}
+.wipe.out{transition:transform .55s cubic-bezier(.75,0,.2,1);transform:translateX(101%)}
+
+/* ===== piezas de interfaz WordPress (simuladas) ===== */
+.win{position:absolute;background:var(--wpbg);color:var(--wpt);border-radius:12px;overflow:hidden;box-shadow:0 30px 70px #0009;font-family:var(--ui)}
+.bb{height:56px;background:#2A2521;display:flex;align-items:center;gap:10px;padding:0 18px;flex:none}
+.bb .d{width:14px;height:14px;border-radius:50%;background:#4A423B}
+.bb .url{flex:1;margin-left:14px;background:#15120F;color:var(--paper);font-family:var(--mono);font-size:23px;border-radius:8px;padding:7px 16px;min-height:40px;white-space:nowrap;overflow:hidden}
+.field{background:#fff;border:1px solid #8C8F94;border-radius:4px;padding:8px 14px;font-size:25px;min-height:46px;color:#2C3338}
+.sel::after{content:"▾";float:right;color:#50575E}
+.chkbox{display:inline-block;width:28px;height:28px;border:2px solid #8C8F94;border-radius:4px;background:#fff;vertical-align:middle;position:relative}
+.admbar{background:#1D2327;color:#C3C4C7;height:44px;display:flex;align-items:center;gap:26px;padding:0 20px;font-family:var(--ui);font-size:22px;flex:none;transition:box-shadow .4s,background .4s}
+.admbar.hi.show,.q.show .admbar.hi{box-shadow:inset 0 0 0 4px var(--or)}
+.side{background:var(--wpd);color:#C3C4C7;font-family:var(--ui);font-size:23px}
+.side li{list-style:none;padding:7px 20px}
+.side li.cur{background:var(--wpb);color:#fff}
+.side ul.sub{background:var(--wpd2);padding:6px 0}
+.side ul.sub li{padding:5px 20px 5px 34px;font-size:22px}
+.side ul.sub li.on2{color:#fff;font-weight:700}
+
+/* ===== S1 portada ===== */
+.s1 .folio{left:140px;top:92px;font-size:236px;font-weight:800;line-height:.85;letter-spacing:-.06em;color:var(--or);font-variation-settings:"opsz" 96}
+.s1 .big{left:140px;top:340px;font-size:112px;line-height:1;font-weight:800;letter-spacing:-.035em;font-variation-settings:"opsz" 96}
+.s1 .sub{left:140px;top:700px;width:960px;font-size:36px;line-height:1.35;color:var(--soft)}
+.s1 .team{left:140px;top:830px;width:1000px;font-size:30px;line-height:1.35;font-weight:600}
+.s1 .cls{left:140px;top:940px;font-size:25px;color:var(--mut)}
+.login{left:1240px;top:230px;width:520px;background:var(--wpbg);color:var(--wpt);border-radius:12px;padding:44px 44px 40px;font-family:var(--ui);box-shadow:0 40px 90px #000a;transform:rotate(1.2deg)}
+.login .lg{width:84px;height:84px;border-radius:50%;background:var(--wpb);color:#fff;font-size:46px;font-weight:700;display:grid;place-items:center;margin:0 auto 30px}
+.login label{display:block;font-size:22px;margin:16px 0 8px}
+.login .field{font-size:28px;height:56px;display:flex;align-items:center}
+.login .rec{font-size:22px;margin:22px 0}
+.login .btn{display:block;width:100%;height:60px;border-radius:4px;background:var(--wpb);color:#fff;font-size:26px;font-weight:600;border:0;text-align:center;line-height:60px;transition:transform .15s}
+.login.press .btn{transform:scale(.97)}
+.login .prog{height:6px;background:#D0D4D9;border-radius:3px;margin-top:22px;overflow:hidden}
+.login .prog i{display:block;height:100%;width:0;background:var(--wpg);transition:width 1.4s ease}
+.login.press .prog i{width:100%}
+.login .bt2{display:none}.login.press .bt1{display:none}.login.press .bt2{display:inline}
+
+/* ===== S2 índice ===== */
+.s2 .row{position:absolute;left:140px;right:140px;height:122px;border-top:2px solid var(--line);display:grid;grid-template-columns:120px 1fr 440px;align-items:center}
+.s2 .row .n{font-size:84px;font-weight:800;color:var(--or);letter-spacing:-.04em}
+.s2 .row .tt{font-size:50px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.s2 .row .ds{font-size:28px;color:var(--mut);margin-top:6px}
+.s2 .row .who{font-size:40px;font-weight:600;text-align:right}
+
+/* ===== S3 ===== */
+.chain{left:140px;top:258px;display:flex;align-items:center;gap:22px;font-size:29px;font-weight:600}
+.chain em{font-style:normal;color:var(--or);font-size:34px}
+.mods{right:140px;top:254px;display:flex;gap:34px;font-size:28px;font-weight:600}
+.mods span::before{content:"";display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--ok);margin-right:12px;box-shadow:0 0 0 6px #3FD07F33}
+.code{background:#0F0D0B;border:2px solid var(--line);border-radius:12px;font-family:var(--mono);overflow:hidden}
+.code .tab{background:#26211C;padding:12px 22px;font-size:23px;color:var(--mut)}
+.code pre{padding:26px 26px;font-size:28px;line-height:1.75;font-family:var(--mono);color:#E8DFCE}
+.code .k{color:var(--sky)} .code .v{color:#FFB36B}
+.pw{margin-top:14px}
+.meter{height:12px;background:#D0D4D9;border-radius:6px;overflow:hidden;margin-top:12px}
+.meter i{display:block;height:100%;width:0;background:var(--wpr);transition:width 1s ease}
+.meter.show i{width:18%}
+
+/* ===== S4 ===== */
+.s4 .set{display:grid;grid-template-columns:270px 1fr;align-items:center;height:62px;border-bottom:1px solid #DCDCDE;font-size:24px}
+.s4 .set b{font-weight:600}
+.s4 .tg{position:absolute;width:300px;border-left:5px solid var(--or);padding-left:20px;font-family:var(--disp);font-size:27px;font-weight:700;color:#B34F00;display:flex;align-items:center;line-height:1.2}
+.hola{font-size:21px;color:var(--ok);margin-left:12px}
+
+/* ===== S5 ===== */
+.pan{background:var(--wpbg);color:var(--wpt);border-radius:12px;font-family:var(--ui);padding:30px 34px}
+.pan label{display:block;font-size:24px;font-weight:600;margin:0 0 10px}
+.pan .field{margin-bottom:26px;font-size:26px;min-height:54px}
+.sq{position:absolute;border-radius:6px;background:linear-gradient(135deg,var(--or),#FFB36B 55%,var(--sky));overflow:hidden}
+.sq::after{content:"";position:absolute;right:14%;top:14%;width:18%;height:18%;border-radius:50%;background:#fff8}
+.sq.ph{left:0;bottom:0}
+.sq.q{transition:opacity .4s,transform .5s cubic-bezier(.2,.8,.2,1);transform:scale(.6);transform-origin:left bottom}
+.sq.q.show{transform:scale(1)}
+.leg{font-size:28px;line-height:1.7}
+.leg i{display:inline-block;width:20px;height:20px;border-radius:4px;margin-right:14px;vertical-align:-2px}
+
+/* ===== S6 ===== */
+.radio{display:flex;gap:22px;align-items:flex-start;margin-bottom:34px}
+.radio .rb{width:38px;height:38px;border-radius:50%;border:3px solid var(--mut);flex:none;margin-top:4px;position:relative}
+.radio.sel .rb{border-color:var(--or)}
+.radio.sel .rb::after{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--or)}
+.radio .rt{font-size:38px;font-weight:700;line-height:1.1}
+.radio .rd{font-size:27px;color:var(--mut);margin-top:6px}
+.box{border-left:6px solid var(--or);padding:6px 0 6px 26px;font-size:30px;line-height:1.4;color:var(--paper)}
+.vis .cbx{width:50px;height:50px;border-radius:8px;border:3px solid var(--or);background:var(--or);flex:none;position:relative;transition:background .3s,border-color .3s}
+.vis .cbx::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:var(--bg);font-size:36px;font-weight:800}
+.vis.sw.show .cbx{background:transparent;border-color:var(--mut)}
+.vis.sw.show .cbx::after{content:""}
+.vis .st1,.vis .st2{transition:opacity .4s}
+.vis .st2{opacity:0;position:absolute}
+.vis.sw.show .st1{opacity:0}
+.vis.sw.show .st2{opacity:1}
+.serp{background:#fff;color:#202124;border-radius:12px;padding:26px 30px;font-family:var(--ui);position:relative;overflow:hidden}
+.serp .u{font-size:22px;color:#188038}
+.serp .tl{font-size:34px;color:#1a0dab;margin:4px 0 6px}
+.serp .ds{font-size:24px;color:#4d5156;line-height:1.4}
+.serp .in{transition:filter .6s,opacity .6s;filter:blur(7px);opacity:.45}
+.vis.sw.show ~ .serp .in{filter:none;opacity:1}
+.serp .blk{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:700;color:var(--wpr);transition:opacity .4s}
+.vis.sw.show ~ .serp .blk{opacity:0}
+
+/* ===== S7 comentarios ===== */
+.track{left:140px;top:600px;width:1640px;border-top:4px dashed #51483E}
+.gate{position:absolute;top:520px;width:28px;height:160px;border-radius:6px;background:var(--sky);transform:translateX(-50%)}
+.gt{position:absolute;width:390px;text-align:center;transform:translateX(-50%);top:290px}
+.gt b{display:block;font-size:40px;letter-spacing:-.02em;margin-bottom:10px}
+.gt span{font-size:27px;line-height:1.4;color:var(--mut);display:block}
+.bub{position:absolute;transform:translateX(-50%);height:58px;padding:0 22px;border-radius:29px;font-size:24px;font-weight:600;display:flex;align-items:center;white-space:nowrap;opacity:0}
+.bub.a{background:var(--bad);color:#fff;top:571px;font-family:var(--mono);font-size:21px}
+.bub.b{background:var(--paper);color:var(--bg);top:571px}
+.on .bub.a{animation:bubA 3.6s .5s ease-in-out forwards}
+.on .bub.b{animation:bubB 7.6s 2.6s ease-in-out forwards}
+@keyframes bubA{0%{left:190px;top:571px;opacity:0}8%{opacity:1}52%{left:760px;top:571px}60%{left:748px}66%{left:760px}100%{left:900px;top:745px;opacity:1;transform:translateX(-50%) scale(.85)}}
+@keyframes bubB{0%{left:190px;opacity:0}5%{opacity:1}30%{left:1190px}62%{left:1190px}88%{left:1560px}100%{left:1560px;opacity:1}}
+.queue{left:760px;top:720px;width:280px;height:112px;border:3px dashed #6B5A48;border-radius:12px}
+.queue span{position:absolute;bottom:-44px;left:0;right:0;text-align:center;font-size:26px;color:var(--mut)}
+.appr{left:1320px;top:700px;transform:translateX(-50%);background:var(--ok);color:var(--bg);padding:8px 26px;border-radius:6px;font-weight:800;font-size:28px}
+.pub{left:1560px;top:700px;transform:translateX(-50%);color:var(--ok);font-size:34px;font-weight:800}
+.bar7{left:140px;top:900px;font-size:31px;color:var(--soft)}
+
+/* ===== S8 enlaces ===== */
+.pl{position:absolute;left:140px;right:140px;display:flex;align-items:center;gap:40px}
+.pl .lb{width:330px}
+.pl .lb small{display:block;font-size:26px;color:var(--mut)}
+.pl .lb b{font-size:46px;letter-spacing:-.02em;line-height:1.1}
+.pl .addr{flex:1;height:104px;border-radius:12px;background:#0F0D0B;border:2px solid var(--line);display:flex;align-items:center;padding:0 34px;font-family:var(--mono);font-size:40px;white-space:nowrap}
+.pl.ko .addr{border-color:#7A2F2C}.pl.yes .addr{border-color:#1E6A42}
+.arrow8{left:560px;top:470px;font-size:64px;color:var(--or);font-weight:800}
+
+/* ===== S9 tabla ===== */
+.lg9{left:140px;top:236px;display:flex;gap:26px;font-size:25px;font-weight:600}
+.lg9 span{display:flex;align-items:center;gap:12px}.lg9 i{width:26px;height:10px;border-radius:5px}
+.tb{left:140px;top:290px;width:1640px}
+.tb .th,.tb .tr{display:grid;grid-template-columns:480px 560px 1fr;gap:0 30px;align-items:center;padding-left:26px}
+.tb .th{height:46px;font-size:24px;color:var(--mut)}
+.tb .tr{height:96px;border-top:1px solid var(--line);position:relative;font-size:26px;line-height:1.3;color:var(--soft)}
+.tb .tr::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:8px;border-radius:4px;background:var(--c)}
+.tb .tr b{font-size:30px;color:var(--paper);font-weight:700;line-height:1.2}
+.tb code{font-size:23px;color:#FFD9B0}
+.note9{left:140px;top:945px;font-size:25px;color:var(--mut)}
+
+/* ===== S10 ===== */
+.err{background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;padding:60px 56px;height:100%}
+.err h4{font-size:42px;line-height:1.2;font-weight:700;margin-bottom:26px}
+.err p{font-size:24px;line-height:1.5;color:#333}
+.blk3{position:absolute;left:1010px;width:770px}
+.blk3 .lbl{font-size:30px;font-weight:700;color:var(--or);margin-bottom:8px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.chip{font-family:var(--mono);font-size:27px;font-weight:600;background:#241F1B;border:2px solid var(--line);border-radius:8px;padding:13px 18px}
+.chip::before{content:"✓ ";color:var(--ok)}
+.tagc{position:absolute;background:var(--or);color:var(--bg);font-weight:800;font-size:25px;padding:6px 18px;border-radius:999px}
+
+/* ===== S11 ===== */
+.xp{background:#E9E9E9;color:#111;font-family:var(--ui)}
+.xp .ttl{background:#2F6BB5;color:#fff;padding:12px 22px;font-size:24px;font-weight:600}
+.xp .m{display:grid;grid-template-columns:200px 1fr 190px;align-items:center;height:92px;padding:0 24px;border-bottom:1px solid #C9C9C9;font-size:27px}
+.xp .m b{font-weight:700}
+.xp .stt{display:flex;align-items:center;gap:12px;font-weight:600}
+.xp .stt i{width:20px;height:20px;border-radius:50%}
+.xp .btn2{background:#fff;border:1px solid #999;border-radius:4px;padding:9px 0;text-align:center;font-size:25px;font-weight:600}
+.xp .gd{display:none}
+.xp .my.show .gd{display:flex}.xp .my.show .bd{display:none}
+.xp .my.show .btn2.s{background:#cfe;}
+.xlog{background:#0F0D0B;font-family:var(--mono);font-size:23px;line-height:1.8;padding:24px 26px;color:#CFC6B6;flex:1}
+.xlog .e{color:#FF8D86}.xlog .g{color:#7FE3A6}
+
+/* ===== S12 ===== */
+.s12 .main{background:#F0F0F1}
+
+/* ===== S13 ===== */
+.col13{position:absolute;top:290px;width:760px}
+.col13 .h3{margin-bottom:12px}
+.card13{position:absolute;left:0;width:620px;height:84px;border-radius:8px;background:#26211C;border:2px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:28px;font-weight:600}
+.card13 small{font-size:22px;color:var(--mut);font-weight:500;display:block;margin-top:2px}
+.cat{font-size:22px;background:#3B342D;border-radius:999px;padding:5px 16px;color:var(--soft)}
+.tree{position:absolute;left:0}
+.tree div{font-size:30px;font-weight:600;height:64px;display:flex;align-items:center;padding:0 24px;background:#26211C;border:2px solid var(--line);border-radius:8px;margin-bottom:12px;width:560px}
+.tree div.k{margin-left:60px;width:500px;position:relative}
+.tree div.k::before{content:"";position:absolute;left:-36px;top:-14px;height:46px;width:24px;border-left:3px solid #6B5A48;border-bottom:3px solid #6B5A48;border-radius:0 0 0 8px}
+.strip13{left:140px;top:875px;width:1640px;border-top:2px solid var(--line);padding-top:18px;font-size:28px;color:var(--soft)}
+
+/* ===== S14 ===== */
+.col14{position:absolute;top:290px;width:506px}
+.col14 .p{margin-top:12px;font-size:27px}
+.vis14{position:absolute;left:0;top:225px;width:506px}
+.tagt{display:inline-block;background:#26211C;border:2px solid var(--line);border-radius:999px;padding:12px 30px;font-size:33px;font-weight:600;margin:0 12px 16px 0}
+.tile{position:absolute;width:240px;height:170px;border-radius:12px;display:grid;place-items:center;font-size:32px;font-weight:700;color:var(--bg)}
+.blkg{position:absolute;left:0;width:506px;height:68px;border:2px dashed #6B5A48;border-radius:6px;display:flex;align-items:center;padding:0 26px;font-size:30px;font-weight:600;background:#1B1713}
+
+/* ===== S15 ===== */
+.it15{position:absolute;left:140px;width:900px}
+.it15 .p{font-size:28px;margin-top:8px}
+.lay{position:absolute;border-radius:12px}
+
+/* ===== S16 ===== */
+.pr{position:absolute;left:140px;width:1640px;height:150px;border-top:2px solid var(--line);display:grid;grid-template-columns:110px 1fr 300px;align-items:center;gap:0 34px}
+.pr .ic{width:100px;height:100px;border-radius:14px;display:grid;place-items:center;font-size:52px;font-weight:800;color:var(--bg)}
+.pr .nm{font-size:46px;font-weight:700;letter-spacing:-.02em}
+.pr .ds{font-size:28px;color:var(--mut);margin-top:4px}
+.bt{border-radius:6px;background:var(--wpb);color:#fff;text-align:center;font-family:var(--ui);font-size:26px;font-weight:600;padding:14px 0;position:relative}
+.bt span{display:none}.bt .l1{display:inline}
+.pr.show .bt{background:#0A7F2E}.pr.show .bt .l1{display:none}.pr.show .bt .l2{display:inline}
+.warnb{left:140px;top:810px;width:1640px;padding:22px 30px;border-left:8px solid var(--warn);background:#2A2418;font-size:31px;line-height:1.4}
+
+/* ===== S17 ===== */
+.ro{position:absolute;left:140px;width:1640px;height:104px;border-top:2px solid var(--line);display:grid;grid-template-columns:420px 1fr 330px;align-items:center}
+.ro b{font-size:46px;letter-spacing:-.02em}
+.ro span{font-size:29px;color:var(--soft)}
+.mt{display:flex;gap:10px;justify-content:flex-end}
+.mt i{width:54px;height:20px;border-radius:5px;background:#332C26;transition:background .3s}
+.ro.show .mt i.f{background:var(--or)}
+.note17{left:140px;top:850px;width:1640px;font-size:30px;line-height:1.5;color:var(--soft)}
+
+/* ===== S18 ===== */
+.s18{background:var(--or);color:var(--bg)}
+.s18 .big{left:130px;top:140px;font-size:330px;font-weight:800;letter-spacing:-.06em;line-height:1;font-variation-settings:"opsz" 96}
+.s18 .pil{position:absolute;top:600px;width:370px;border-top:6px solid var(--bg);padding-top:22px;font-size:40px;font-weight:700;line-height:1.15;letter-spacing:-.02em}
+.s18 .nm{left:140px;top:920px;font-size:30px;font-weight:600}
+
+/* ===== controles ===== */
+.ctl{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:8px;background:#000B;border:1px solid #fff2;border-radius:999px;padding:8px;z-index:20;transition:opacity .5s;backdrop-filter:blur(8px)}
+.ctl.hide{opacity:0;pointer-events:none}
+.ctl button{background:transparent;color:#fff;border:0;border-radius:999px;font:600 16px var(--disp);padding:10px 18px;cursor:pointer}
+.ctl button:hover{background:#fff2}
+button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.notes{position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;background:#000E;color:#fff;padding:22px 7vw calc(70px + env(safe-area-inset-bottom,0px));font:400 clamp(17px,1.7vw,24px)/1.5 var(--disp);z-index:15;display:none;border-top:3px solid var(--or)}
+.notes.open{display:block}
+.notes small{display:block;color:var(--or);font-weight:700;margin-bottom:6px}
+
+@media (prefers-reduced-motion:reduce){
+  .h{clip-path:none!important;animation:none!important}
+  .r{opacity:1!important;filter:none!important;animation:none!important}
+  .q{transition:none}
+  .wipe{display:none}
+  .on .bub.a,.on .bub.b{animation:none}
+  .bub.a{opacity:1;left:900px;top:745px;transform:translateX(-50%) scale(.85)}
+  .bub.b{opacity:1;left:1560px}
+}
+</style>
+</head>
+<body>
+<div class="fit" id="fit">
+<div class="stage" id="stage">
+
+<div class="tape" id="tape">
+  <div class="seg"><i></i><span>Darío Salas</span></div>
+  <div class="seg"><i></i><span>Leire Portilla</span></div>
+  <div class="seg"><i></i><span>Xiang Su Liu</span></div>
+  <div class="seg"><i></i><span>José María</span></div>
+  <div class="seg"><i></i><span>Mateo Montano</span></div>
+</div>
+
+<!-- 1 PORTADA -->
+<section class="slide s1" data-part="0">
+  <div class="a folio r" style="--d:.2s">4.4</div>
+  <h1 class="a big h" style="--d:.45s">Comenzar a<br>trabajar con<br>WordPress</h1>
+  <p class="a sub r" style="--d:1.3s">Ajustes, incidencias y términos básicos, con práctica sobre una instalación real en local.</p>
+  <p class="a team r" style="--d:1.6s">Xiang Su Liu, Darío Salas, Leire Portilla, José María y Mateo Montano</p>
+  <p class="a cls r" style="--d:1.9s">UT04 Instalación de un gestor de contenidos · 2º ASIR · Implantación de aplicaciones web · Digitech FP</p>
+  <div class="a login r" id="login" style="--d:1s">
+    <div class="lg">W</div>
+    <label>Nombre de usuario o correo electrónico</label>
+    <div class="field"><span class="ty" data-text="admin" data-o="2200" data-sp="90"></span></div>
+    <label>Contraseña</label>
+    <div class="field"><span class="ty" data-text="••••••" data-o="3200" data-sp="90"></span></div>
+    <div class="rec"><span class="chkbox" style="width:24px;height:24px;margin-right:10px"></span>Recuérdame</div>
+    <div class="btn"><span class="bt1">Acceder</span><span class="bt2">Entrando…</span></div>
+    <div class="prog"><i></i></div>
+  </div>
+</section>
+
+<!-- 2 ÍNDICE -->
+<section class="slide s2" data-part="0">
+  <h2 class="t h" style="--d:.2s">Cinco partes, una por integrante</h2>
+  <div class="row r" style="top:290px;--d:.7s"><div class="n">1</div><div><div class="tt">Instalación y ajustes básicos</div><div class="ds">XAMPP, wp-admin, Generales, Escritura y Medios</div></div><div class="who">Darío Salas</div></div>
+  <div class="row r" style="top:412px;--d:1s"><div class="n">2</div><div><div class="tt">Visibilidad y SEO</div><div class="ds">Lectura, Comentarios y Enlaces permanentes</div></div><div class="who">Leire Portilla</div></div>
+  <div class="row r" style="top:534px;--d:1.3s"><div class="n">3</div><div><div class="tt">Incidencias</div><div class="ds">Errores típicos, uno real y cómo se resuelven</div></div><div class="who">Xiang Su Liu</div></div>
+  <div class="row r" style="top:656px;--d:1.6s"><div class="n">4</div><div><div class="tt">Contenido e interfaz</div><div class="ds">Escritorio, entradas, páginas y taxonomías</div></div><div class="who">José María</div></div>
+  <div class="row r" style="top:778px;--d:1.9s"><div class="n">5</div><div><div class="tt">Diseño y usuarios</div><div class="ds">Temas, plugins y roles de usuario</div></div><div class="who">Mateo Montano</div></div>
+</section>
+
+<!-- 3 XAMPP -->
+<section class="slide s3" data-part="1">
+  <h2 class="t h" style="--d:.2s">WordPress con XAMPP en cinco minutos</h2>
+  <div class="a chain r" style="--d:.8s">Crear la base en phpMyAdmin <em>›</em> Copiar WordPress a htdocs <em>›</em> Seguir el asistente</div>
+  <div class="a mods r" style="--d:1s"><span>Apache</span><span>MySQL</span></div>
+
+  <div class="a h3 r" style="left:140px;top:370px;--d:1.2s">1. Conexión con MySQL</div>
+  <div class="a code r" style="left:140px;top:450px;width:820px;--d:1.4s">
+    <div class="tab">wp-config.php</div>
+<pre><span class="q" data-o="2000"><span class="k">define</span>( <span class="v">'DB_NAME'</span>,     <span class="v">'wordpress'</span> );</span>
+<span class="q" data-o="2500"><span class="k">define</span>( <span class="v">'DB_USER'</span>,     <span class="v">'root'</span> );</span>
+<span class="q" data-o="3000"><span class="k">define</span>( <span class="v">'DB_PASSWORD'</span>, <span class="v">''</span> );</span>
+<span class="q" data-o="3500"><span class="k">define</span>( <span class="v">'DB_HOST'</span>,     <span class="v">'localhost'</span> );</span></pre>
+  </div>
+  <p class="a p r" style="left:140px;top:800px;width:820px;--d:1.6s">Base <code>wordpress</code>, usuario <code>root</code>, sin contraseña, servidor <code>localhost</code>.</p>
+
+  <div class="a h3 r" style="left:1040px;top:370px;--d:1.2s">2. Datos del sitio</div>
+  <div class="a pan r" style="left:1040px;top:450px;width:740px;height:262px;--d:1.4s">
+    <label>Nombre de usuario</label>
+    <div class="field" style="margin-bottom:16px"><span class="ty" data-text="admin" data-o="4200" data-sp="80"></span></div>
+    <label>Contraseña</label>
+    <div class="field" style="margin-bottom:0"><span class="ty" data-text="123456" data-o="4900" data-sp="80"></span></div>
+    <div class="meter sw" data-o="6000" style="margin-top:14px"><i></i></div>
+  </div>
+  <p class="a q" data-o="6200" style="left:1040px;top:800px;font-size:29px;font-weight:700"><span class="bad">Contraseña muy débil.</span> <span class="warn">Sirve en clase, nunca en producción.</span></p>
+</section>
+
+<!-- 4 wp-admin + Generales -->
+<section class="slide s4" data-part="1">
+  <h2 class="t two h" style="--d:.2s">Entrar en wp-admin y<br>revisar Ajustes › Generales</h2>
+  <div class="win r" style="left:140px;top:330px;width:1640px;height:650px;--d:.9s;display:flex;flex-direction:column">
+    <div class="bb"><span class="d"></span><span class="d"></span><span class="d"></span>
+      <div class="url"><span class="ty" data-text="localhost/wordpress/wp-admin" data-o="1500" data-sp="38"></span></div>
+      <span class="hola q" data-o="3000">Hola, admin</span></div>
+    <div style="display:flex;flex:1;min-height:0">
+      <div class="side" style="width:290px;padding-top:12px">
+        <ul><li>Escritorio</li><li>Entradas</li><li>Páginas</li><li>Apariencia</li><li>Plugins</li><li>Usuarios</li><li class="cur">Ajustes</li></ul>
+        <ul class="sub"><li class="on2">Generales</li><li>Escritura</li><li>Lectura</li><li>Medios</li><li>Enlaces permanentes</li></ul>
+      </div>
+      <div style="flex:1;padding:22px 34px;position:relative">
+        <div style="font-size:36px;font-weight:600;margin-bottom:12px">Ajustes generales</div>
+        <div style="width:960px">
+          <div class="set q" data-o="3600"><b>Título del sitio</b><div class="field" style="width:340px">Trabajo</div></div>
+          <div class="set q" data-o="3900"><b>Descripción corta</b><div class="field" style="width:440px">Trabajo de clase</div></div>
+          <div class="set q" data-o="4800"><b>Dirección URL y correo</b><span>En producción con <code>https://</code></span></div>
+          <div class="set q" data-o="5100"><b>Cualquiera puede registrarse</b><span><span class="chkbox"></span> &nbsp;desactivado · perfil <b style="display:inline">Suscriptor</b></span></div>
+          <div class="set q" data-o="6000"><b>Idioma y zona horaria</b><span>Español · Madrid</span></div>
+          <div class="set q" data-o="6300"><b>Formato de fecha</b><span>Para programar entradas</span></div>
+        </div>
+        <div class="tg q" data-o="3700" style="left:1010px;top:98px;height:116px">Identidad del sitio</div>
+        <div class="tg q" data-o="4900" style="left:1010px;top:222px;height:116px">URL, correo y Miembros</div>
+        <div class="tg q" data-o="6100" style="left:1010px;top:346px;height:116px">Idioma, zona y fecha</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 Escritura y Medios -->
+<section class="slide s5" data-part="1">
+  <h2 class="t h" style="--d:.2s">Ajustes › Escritura y Medios</h2>
+  <div class="a h3 r" style="left:140px;top:290px;--d:.8s">Escritura</div>
+  <div class="a pan r" style="left:140px;top:370px;width:780px;--d:1s">
+    <label>Categoría predeterminada de las entradas</label><div class="field sel">Sin categoría</div>
+    <label>Formato predeterminado de las entradas</label><div class="field sel" style="margin-bottom:0">Estándar</div>
+  </div>
+  <p class="a p r" style="left:140px;top:690px;width:780px;--d:1.3s">Decide la categoría que recibe una entrada si no le asignamos ninguna.</p>
+
+  <div class="a h3 r" style="left:1040px;top:290px;--d:.8s">Medios</div>
+  <div class="a r" style="left:1040px;top:370px;width:740px;height:330px;--d:1s">
+    <div class="a" style="left:0;top:90px;width:150px;height:200px;border:3px dashed #6B5A48;border-radius:10px;display:grid;place-items:center;font-size:26px;color:var(--mut);text-align:center;line-height:1.3">Imagen<br>original</div>
+    <div class="a" style="left:176px;top:160px;font-size:60px;color:var(--or);font-weight:800">›</div>
+    <div class="a" style="left:250px;top:0;width:480px;height:330px">
+      <div class="sq q" data-o="2400" style="left:0;bottom:0;width:300px;height:300px"></div>
+      <div class="sq q" data-o="3200" style="left:330px;bottom:0;width:88px;height:88px"></div>
+      <div class="sq q" data-o="4000" style="left:438px;bottom:0;width:44px;height:44px"></div>
+    </div>
+  </div>
+  <div class="a leg r" style="left:1040px;top:720px;--d:1.3s">
+    <div><i style="background:var(--or)"></i>Grande · 1024 × 1024 px</div>
+    <div><i style="background:#FFB36B"></i>Medio · 300 × 300 px</div>
+    <div><i style="background:var(--sky)"></i>Miniatura · 150 × 150 px</div>
+  </div>
+  <p class="a p r" style="left:140px;top:820px;width:780px;--d:1.5s">Cada imagen genera tres recortes para no cargar la web con la original.</p>
+</section>
+
+<!-- 6 Lectura -->
+<section class="slide s6" data-part="2">
+  <h2 class="t h" style="--d:.2s">Ajustes › Lectura</h2>
+  <div class="a h3 r" style="left:140px;top:290px;--d:.8s">Tu portada muestra</div>
+  <div class="a r" style="left:140px;top:390px;width:820px;--d:1s">
+    <div class="radio sel"><div class="rb"></div><div><div class="rt">Tus últimas entradas</div><div class="rd">Para un blog o un periódico</div></div></div>
+    <div class="radio"><div class="rb"></div><div><div class="rt">Una página estática</div><div class="rd">Para una web de empresa o una tienda</div></div></div>
+  </div>
+  <div class="a box r" style="left:140px;top:700px;width:820px;--d:1.3s"><b>Nuestra práctica:</b> dejamos “Tus últimas entradas”. La portada funciona como blog.</div>
+
+  <div class="a h3 r" style="left:1040px;top:290px;--d:.8s">Visibilidad en buscadores</div>
+  <div class="a r" style="left:1040px;top:380px;width:740px;--d:1s">
+    <div class="vis sw" data-o="4500" style="display:flex;gap:24px;align-items:center;position:relative">
+      <div class="cbx"></div>
+      <div style="font-size:29px;line-height:1.3;font-weight:600">Pedir a los motores de búsqueda que no indexen este sitio</div>
+    </div>
+    <div style="height:44px;margin:14px 0 18px 74px;position:relative;font-size:28px;font-weight:700">
+      <span class="warn" style="position:absolute" id="s6a">En desarrollo: se marca</span>
+    </div>
+    <div class="serp"><div class="in"><div class="u">tusitio.com</div><div class="tl">Trabajo</div><div class="ds">Trabajo de clase. Últimas entradas del sitio.</div></div><div class="blk">No aparece en Google</div></div>
+  </div>
+  <p class="a p r" style="left:1040px;top:800px;width:740px;--d:1.4s">Al publicar se desmarca. Si se olvida, la web no se posiciona en Google: es un error muy común.</p>
+</section>
+
+<!-- 7 Comentarios -->
+<section class="slide s7" data-part="2">
+  <h2 class="t h" style="--d:.2s">Ajustes › Comentarios</h2>
+  <div class="gt r" style="left:480px;--d:.7s"><b>Identificación</b><span>Obligar a que quien comenta deje su nombre y su correo electrónico.</span></div>
+  <div class="gt r" style="left:900px;--d:.9s"><b>Filtro de spam</b><span>Retener en cola los comentarios con enlaces sospechosos.</span></div>
+  <div class="gt r" style="left:1320px;--d:1.1s"><b>Moderación previa</b><span>El administrador aprueba el primer comentario de cada persona antes de publicarlo.</span></div>
+  <div class="a track r" style="--d:.6s"></div>
+  <div class="gate r" style="left:480px;--d:.8s"></div>
+  <div class="gate r" style="left:900px;--d:1s"></div>
+  <div class="gate r" style="left:1320px;--d:1.2s"></div>
+  <div class="a queue r" style="--d:1.3s"><span>En cola</span></div>
+  <div class="bub a">oferta-gratis.xyz</div>
+  <div class="bub b">Buen artículo</div>
+  <div class="a appr q" data-o="5800">Aprobar</div>
+  <div class="a pub q" data-o="8600">Publicado ✓</div>
+  <p class="a bar7 r" style="--d:1.6s">Combinando las tres opciones evitamos el spam y los mensajes no deseados.</p>
+</section>
+
+<!-- 8 Enlaces permanentes -->
+<section class="slide s8" data-part="2">
+  <h2 class="t h" style="--d:.2s">Ajustes › Enlaces permanentes</h2>
+  <div class="pl ko r" style="top:310px;--d:.8s"><div class="lb"><small>Antes</small><b>Simple</b></div><div class="addr"><span class="ty" data-text="localhost/wordpress/?p=123" data-o="1400" data-sp="45" style="color:#FF8D86"></span></div></div>
+  <div class="a arrow8 r" style="--d:1.2s;left:140px;top:446px;width:330px;text-align:center">↓</div>
+  <div class="pl yes r" style="top:560px;--d:1.2s"><div class="lb"><small>Después</small><b>Nombre de la entrada</b></div><div class="addr"><span class="ty" data-text="localhost/wordpress/pagina-ejemplo/" data-o="3600" data-sp="45" style="color:#7FE3A6"></span></div></div>
+  <p class="a r" style="left:140px;top:790px;width:1640px;font-size:36px;line-height:1.4;font-weight:600;--d:1.6s">URL limpias: fáciles de recordar y mejores para el posicionamiento en Google.</p>
+  <div class="a r" style="left:140px;top:880px;display:flex;gap:22px;align-items:center;--d:1.8s"><span class="pill" style="background:#26211C;border:2px solid var(--line);font-family:var(--mono)">%postname%</span><span class="lead" style="font-size:28px">Etiqueta usada. Al guardar, WordPress reescribe el archivo <code>.htaccess</code>.</span></div>
+</section>
+
+<!-- 9 Incidencias -->
+<section class="slide s9" data-part="3">
+  <h2 class="t h" style="--d:.2s">Las seis incidencias más habituales</h2>
+  <div class="a lg9 r" style="--d:.7s"><span><i style="background:var(--sky)"></i>Base de datos y código</span><span><i style="background:var(--or)"></i>Rutas y servidor</span><span><i style="background:var(--warn)"></i>Permisos y SSL</span></div>
+  <div class="a tb">
+    <div class="th r" style="--d:.8s"><span>Incidencia</span><span>Causa principal</span><span>Solución</span></div>
+    <div class="tr q" data-o="1000" style="--c:var(--sky)"><b>Error de conexión con la BD</b><span>Credenciales mal en <code>wp-config.php</code> o MySQL caído</span><span>Revisar <code>DB_NAME</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code> y <code>DB_HOST</code></span></div>
+    <div class="tr q" data-o="1600" style="--c:var(--sky)"><b>Pantalla blanca (WSOD)</b><span>Memoria PHP agotada o plugin con fallos</span><span><code>WP_DEBUG</code> a true, <code>WP_MEMORY_LIMIT</code> 256M o renombrar plugins</span></div>
+    <div class="tr q" data-o="2200" style="--c:var(--or)"><b>Error 500</b><span><code>.htaccess</code> corrupto o PHP incompatible</span><span>Renombrar <code>.htaccess</code> y guardar Enlaces permanentes</span></div>
+    <div class="tr q" data-o="2800" style="--c:var(--or)"><b>Error 404 en páginas internas</b><span>Reglas de reescritura sin aplicar</span><span>Ajustes › Enlaces permanentes › Guardar cambios</span></div>
+    <div class="tr q" data-o="3400" style="--c:var(--warn)"><b>Fallo al subir archivos</b><span>Permisos incorrectos en <code>wp-content</code></span><span>Por FTP: 755 en carpetas y 644 en archivos</span></div>
+    <div class="tr q" data-o="4000" style="--c:var(--warn)"><b>Bucle de redirecciones</b><span>Choque entre HTTPS y las URL guardadas</span><span><code>WP_HOME</code> y <code>WP_SITEURL</code> con https:// en <code>wp-config.php</code></span></div>
+  </div>
+  <p class="a note9 q" data-o="4600">Los permisos y el bucle HTTPS no se pueden reproducir en XAMPP sobre Windows: solo los explicamos.</p>
+</section>
+
+<!-- 10 Error de BD -->
+<section class="slide s10" data-part="3">
+  <h2 class="t h" style="--d:.2s">Error al establecer la conexión con la BD</h2>
+  <div class="win r" style="left:140px;top:320px;width:800px;height:600px;--d:.8s;display:flex;flex-direction:column">
+    <div class="bb"><span class="d"></span><span class="d"></span><span class="d"></span><div class="url">localhost/wordpress/</div></div>
+    <div class="err"><h4>Error establishing a database connection</h4><p>This either means that the username and password information in your wp-config.php file is incorrect or that contact with the database server at localhost could not be established.</p></div>
+  </div>
+  <div class="tagc q" data-o="2500" style="left:560px;top:850px;transform:rotate(-2deg)">Ni carga el idioma</div>
+  <div class="blk3 r" style="top:320px;--d:1s"><div class="lbl">Qué vimos</div><p class="p">Al fallar la base de datos, WordPress ni siquiera carga el idioma y muestra el error en inglés.</p></div>
+  <div class="blk3 r" style="top:520px;--d:1.3s"><div class="lbl">Causa</div><p class="p">WordPress no consigue leer las tablas de MySQL.</p></div>
+  <div class="blk3 r" style="top:660px;--d:1.6s"><div class="lbl">Solución</div><p class="p">Abrir <code>wp-config.php</code> y comprobar que estos 4 datos coinciden con la base de datos creada:</p>
+    <div class="chips"><div class="chip q" data-o="3200">DB_NAME</div><div class="chip q" data-o="3600">DB_USER</div><div class="chip q" data-o="4000">DB_PASSWORD</div><div class="chip q" data-o="4400">DB_HOST</div></div></div>
+</section>
+
+<!-- 11 MySQL se detuvo -->
+<section class="slide s11" data-part="3">
+  <h2 class="t h" style="--d:.2s">MySQL se detuvo durante la práctica</h2>
+  <div class="a r" style="left:140px;top:236px;--d:.7s"><span class="pill" style="background:var(--or);color:var(--bg)">Incidencia real</span> <span class="lead" style="font-size:27px;margin-left:12px">No la provocamos: nos pasó de verdad.</span></div>
+  <div class="win xp r" style="left:140px;top:330px;width:860px;height:600px;--d:.9s;display:flex;flex-direction:column">
+    <div class="ttl">XAMPP Control Panel</div>
+    <div class="m"><b>Apache</b><div class="stt"><i style="background:var(--wpg)"></i>Running</div><div class="btn2">Stop</div></div>
+    <div class="m my q" data-o="3400" style="opacity:1;transition:none"><b>MySQL</b>
+      <div class="stt bd" style="color:#B00020"><i style="background:#D63638"></i>Error</div><div class="stt gd" style="color:#0A7F2E"><i style="background:var(--wpg)"></i>Running</div>
+      <div class="btn2 s"><span class="bd">Start</span><span class="gd">Stop</span></div></div>
+    <div class="xlog">
+      <div class="e q" data-o="1400">[mysql] Error: MySQL shutdown unexpectedly.</div>
+      <div class="q" data-o="3400">[mysql] Attempting to start MySQL app...</div>
+      <div class="g q" data-o="4400">[mysql] Status change detected: running</div>
+    </div>
+  </div>
+  <div class="blk3 r" style="left:1060px;width:720px;top:330px;--d:1.1s"><div class="lbl">Qué pasó</div><p class="p">XAMPP mostró “MySQL shutdown unexpectedly” y la web dejó de conectar con la base de datos.</p></div>
+  <div class="blk3 r" style="left:1060px;width:720px;top:530px;--d:1.4s"><div class="lbl">Causas típicas</div><p class="p">Puerto 3306 ocupado por otro programa, falta de permisos o un cierre incorrecto.</p></div>
+  <div class="blk3 r" style="left:1060px;width:720px;top:710px;--d:1.7s"><div class="lbl">Cómo lo resolvimos</div><p class="p">Volvimos a arrancar el módulo MySQL y el estado pasó a “running”. Si se repite, revisar Logs y el puerto.</p></div>
+</section>
+
+<!-- 12 Escritorio -->
+<section class="slide s12" data-part="4">
+  <h2 class="t h" style="--d:.2s">Escritorio y barra de herramientas</h2>
+  <div class="win r" style="left:140px;top:290px;width:790px;height:520px;--d:.8s;display:flex;flex-direction:column">
+    <div class="bb"><span class="d"></span><span class="d"></span><span class="d"></span><div class="url">localhost/wordpress/wp-admin</div></div>
+    <div class="admbar hi q" data-o="3200" id="hi1"><b style="color:#fff">W</b><span>Trabajo</span><span>+ Añadir</span></div>
+    <div style="display:flex;flex:1;min-height:0">
+      <div class="side" style="width:210px;padding-top:8px"><ul><li class="cur">Escritorio</li><li>Entradas</li><li>Medios</li><li>Páginas</li><li>Apariencia</li><li>Plugins</li></ul></div>
+      <div class="main" style="flex:1;padding:22px 26px"><div style="font-size:32px;font-weight:600;margin-bottom:16px">Escritorio</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div style="background:#fff;border:1px solid #C3C4C7;height:120px;padding:14px;font-size:22px">De un vistazo<br><small style="color:#646970">1 entrada, 2 páginas</small></div><div style="background:#fff;border:1px solid #C3C4C7;height:120px;padding:14px;font-size:22px">Actividad</div><div style="background:#fff;border:1px solid #C3C4C7;height:120px;padding:14px;font-size:22px;grid-column:1/3">Borrador rápido</div></div></div>
+    </div>
+  </div>
+  <div class="win r" style="left:990px;top:290px;width:790px;height:520px;--d:1s;display:flex;flex-direction:column">
+    <div class="bb"><span class="d"></span><span class="d"></span><span class="d"></span><div class="url">localhost/wordpress/</div></div>
+    <div class="admbar hi q" data-o="3200" id="hi2"><b style="color:#fff">W</b><span>Trabajo</span><span>Editar sitio</span><span>+ Añadir</span></div>
+    <div class="main" style="flex:1;padding:30px 40px;background:#fff"><div style="font-size:40px;font-weight:700">Trabajo</div><div style="font-size:23px;color:#646970;margin-bottom:26px">Trabajo de clase</div>
+      <div style="font-size:32px;font-weight:700;margin-bottom:6px">¡Hola, mundo!</div><div style="font-size:23px;color:#646970;line-height:1.5">Te damos la bienvenida a WordPress. Esta es tu primera entrada. Edítala o bórrala, ¡y comienza a escribir!</div></div>
+  </div>
+  <div class="a r" style="left:140px;top:830px;width:790px;--d:1.3s"><div class="h3" style="font-size:40px">Escritorio (Dashboard)</div><p class="p" style="font-size:28px">Centro de mando privado con el menú lateral.</p></div>
+  <div class="a r" style="left:990px;top:830px;width:790px;--d:1.5s"><div class="h3" style="font-size:40px">Barra de herramientas</div><p class="p" style="font-size:28px">Franja negra superior, también en la web pública.</p></div>
+</section>
+
+<!-- 13 Entradas vs Páginas -->
+<section class="slide s13" data-part="4">
+  <h2 class="t h" style="--d:.2s">Entradas frente a Páginas</h2>
+  <div class="col13 r" style="left:140px;--d:.8s"><div class="h3">Entradas (Posts)</div><p class="p" style="font-size:28px">Ligadas a una fecha, de más reciente a más antigua, con categorías y etiquetas.</p></div>
+  <div class="a" style="left:140px;top:500px;width:760px;height:340px">
+    <div class="card13 q" data-o="1800" style="top:0"><div>Entrada nueva<small>5 de noviembre</small></div><span class="cat">Noticias</span></div>
+    <div class="card13 q" data-o="2400" style="top:106px"><div>Entrada anterior<small>29 de octubre</small></div><span class="cat">Deportes</span></div>
+    <div class="card13 q" data-o="3000" style="top:212px"><div>¡Hola, mundo!<small>La más antigua</small></div><span class="cat">Sin categoría</span></div>
+    <div class="a" style="left:660px;top:0;height:296px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;color:var(--or);font-weight:800;font-size:26px;width:100px"><span>reciente</span><span style="font-size:44px;line-height:1">↓</span><span>antigua</span></div>
+  </div>
+  <div class="col13 r" style="left:1020px;--d:1s"><div class="h3">Páginas (Pages)</div><p class="p" style="font-size:28px">Contenido fijo y atemporal. Sin fecha ni categorías, con jerarquía.</p></div>
+  <div class="a tree" style="left:1020px;top:500px">
+    <div class="q" data-o="3600">Inicio</div>
+    <div class="k q" data-o="4100">Contacto</div>
+    <div class="k q" data-o="4600">Aviso legal</div>
+  </div>
+  <div class="a strip13 r" style="--d:1.6s">En nuestra instalación: <b style="color:var(--paper)">1 entrada</b> (¡Hola, mundo!, en Sin categoría) y <b style="color:var(--paper)">2 páginas</b> (Página de ejemplo y Política de privacidad, en borrador).</div>
+</section>
+
+<!-- 14 Organizar contenido -->
+<section class="slide s14" data-part="4">
+  <h2 class="t h" style="--d:.2s">Organizar y crear contenido</h2>
+  <div class="col14 r" style="left:140px;--d:.8s"><div class="h3">Taxonomías</div><p class="p">Categorías con jerarquía, como Deportes › Fútbol. Etiquetas sueltas, como “fichajes” o “lesiones”.</p>
+    <div class="vis14" style="top:235px"><div class="tagt q" data-o="1800" style="background:#3B342D">Deportes</div><br><div class="tagt q" data-o="2300" style="margin-left:44px;background:#3B342D">› Fútbol</div><div style="height:34px"></div><span class="tagt q" data-o="3000" style="color:var(--sky)"># fichajes</span><span class="tagt q" data-o="3400" style="color:var(--sky)"># lesiones</span></div></div>
+  <div class="col14 r" style="left:706px;--d:1.1s"><div class="h3">Biblioteca de Medios</div><p class="p">Almacén central de todas las imágenes, vídeos, audios y PDF subidos a la web.</p>
+    <div class="vis14" style="top:250px;height:380px">
+      <div class="tile q" data-o="2000" style="left:0;top:0;background:linear-gradient(135deg,var(--or),var(--sky))">Imagen</div>
+      <div class="tile q" data-o="2500" style="left:266px;top:0;background:#FFB36B">Vídeo ▶</div>
+      <div class="tile q" data-o="3000" style="left:0;top:194px;background:var(--sky)">Audio ♪</div>
+      <div class="tile q" data-o="3500" style="left:266px;top:194px;background:var(--paper)">PDF</div></div></div>
+  <div class="col14 r" style="left:1272px;--d:1.4s"><div class="h3">Editor de bloques</div><p class="p">Gutenberg: el contenido se monta apilando bloques de párrafo, título, imagen, galería o columnas.</p>
+    <div class="vis14" style="top:250px;height:420px">
+      <div class="blkg q" data-o="2200" style="top:0">Título</div>
+      <div class="blkg q" data-o="2700" style="top:84px">Párrafo</div>
+      <div class="blkg q" data-o="3200" style="top:168px">Imagen</div>
+      <div class="blkg q" data-o="3700" style="top:252px">Galería</div>
+      <div class="blkg q" data-o="4200" style="top:336px">Columnas</div></div></div>
+</section>
+
+<!-- 15 Temas -->
+<section class="slide s15" data-part="5">
+  <h2 class="t h" style="--d:.2s">Temas, menús y widgets</h2>
+  <div class="it15 r" style="top:290px;--d:.8s"><div class="h3">Tema (Theme)</div><p class="p">Define el diseño: colores, tipografías y estructura.</p>
+    <div style="margin-top:16px"><span class="pill" style="background:var(--or);color:var(--bg);font-size:24px;margin-right:10px">Activo: Twenty Twenty-Five</span><span class="pill" style="background:#26211C;font-size:24px;margin-right:10px">Four</span><span class="pill" style="background:#26211C;font-size:24px">Three</span></div></div>
+  <div class="it15 r" style="top:510px;--d:1.1s"><div class="h3">Tema hijo (Child Theme)</div><p class="p">Hereda del tema principal y guarda los cambios propios al actualizarlo.</p></div>
+  <div class="it15 r" style="top:700px;--d:1.4s"><div class="h3">Menús y widgets</div><p class="p">Navegación del sitio y módulos de la barra lateral o el pie. En temas de bloques se editan en Apariencia › Editor.</p></div>
+
+  <div class="lay r" style="left:1180px;top:310px;width:600px;height:560px;background:#1F1B17;border:3px solid var(--line);--d:1s">
+    <div class="a mut" style="left:30px;top:20px;font-size:26px">Tema principal</div>
+    <div class="a" style="left:30px;top:70px;right:30px;height:70px;background:#3B342D;border-radius:8px"></div>
+    <div class="a" style="left:30px;top:160px;width:360px;height:300px;background:#3B342D;border-radius:8px"></div>
+    <div class="a" style="left:410px;top:160px;right:30px;height:300px;background:#3B342D;border-radius:8px"></div>
+    <div class="a" style="left:30px;top:480px;right:30px;height:50px;background:#3B342D;border-radius:8px"></div>
+    <div class="q" data-o="2600" style="position:absolute;left:70px;top:105px;right:-30px;height:250px;background:#FF7A1A33;border:3px dashed var(--or);border-radius:12px;padding:20px;font-size:27px;font-weight:700;color:var(--or)">Tema hijo<br><span style="font-weight:500;font-size:24px;color:var(--paper)">tus cambios propios</span></div>
+    <div class="q" data-o="4200" style="position:absolute;left:30px;right:30px;bottom:-62px;font-size:26px;color:var(--sky);font-weight:700;text-align:center">↻ El principal se actualiza, tus cambios se quedan</div>
+  </div>
+</section>
+
+<!-- 16 Plugins -->
+<section class="slide s16" data-part="5">
+  <h2 class="t h" style="--d:.2s">Plugins: funciones sin programar</h2>
+  <p class="a lead r" style="left:140px;top:232px;--d:.7s">Se instalan desde Plugins › Añadir nuevo plugin.</p>
+  <div class="pr q" data-o="1600" style="top:310px;opacity:1;transition:none;--d:0s"><div class="ic" style="background:#8E7DFF">W</div><div><div class="nm">Tienda online</div><div class="ds">WooCommerce convierte la web en una tienda con carrito y pagos.</div></div><div class="bt"><span class="l1">Instalar ahora</span><span class="l2">Activo</span></div></div>
+  <div class="pr q" data-o="2800" style="top:470px;opacity:1;transition:none"><div class="ic" style="background:var(--sky)">Y</div><div><div class="nm">SEO</div><div class="ds">Yoast SEO mejora la presencia del sitio en Google.</div></div><div class="bt"><span class="l1">Instalar ahora</span><span class="l2">Activo</span></div></div>
+  <div class="pr q" data-o="4000" style="top:630px;opacity:1;transition:none"><div class="ic" style="background:var(--warn)">+</div><div><div class="nm">Más funciones</div><div class="ds">Formularios de contacto, copias de seguridad y seguridad.</div></div><div class="bt"><span class="l1">Instalar ahora</span><span class="l2">Activo</span></div></div>
+  <div class="a warnb r" style="--d:1.6s;top:830px;height:104px">Conviene instalar solo los necesarios: <b>un plugin con fallos es una causa típica de la pantalla blanca.</b></div>
+</section>
+
+<!-- 17 Roles -->
+<section class="slide s17" data-part="5">
+  <h2 class="t h" style="--d:.2s">Roles de usuario: de más a menos permisos</h2>
+  <div class="ro q" data-o="1000" style="top:260px;opacity:1;transition:none"><b>Administrador</b><span>Control total: temas, plugins y usuarios</span><div class="mt"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div></div>
+  <div class="ro q" data-o="1700" style="top:364px;opacity:1;transition:none"><b>Editor</b><span>Publica y borra contenido de cualquiera</span><div class="mt"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></div></div>
+  <div class="ro q" data-o="2400" style="top:468px;opacity:1;transition:none"><b>Autor</b><span>Publica solo sus entradas</span><div class="mt"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div></div>
+  <div class="ro q" data-o="3100" style="top:572px;opacity:1;transition:none"><b>Colaborador</b><span>Escribe, pero envía a revisión</span><div class="mt"><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div></div>
+  <div class="ro q" data-o="3800" style="top:676px;opacity:1;transition:none"><b>Suscriptor</b><span>Lee, comenta y edita su perfil</span><div class="mt"><i class="f"></i><i></i><i></i><i></i><i></i></div></div>
+  <p class="a note17 r" style="--d:1.8s">Cada persona, el rol mínimo que necesita: un redactor en prácticas sería Colaborador, no Administrador.<br><span class="mut">En nuestra instalación: un único usuario, <code style="color:var(--or)">admin</code>, con rol Administrador.</span></p>
+</section>
+
+<!-- 18 Preguntas -->
+<section class="slide s18" data-part="0">
+  <div class="a big h" style="--d:.3s">¿Preguntas?</div>
+  <div class="pil r" style="left:140px;--d:1.2s">Instalar</div>
+  <div class="pil r" style="left:560px;--d:1.4s">Configurar los ajustes</div>
+  <div class="pil r" style="left:980px;--d:1.6s">Resolver incidencias</div>
+  <div class="pil r" style="left:1400px;--d:1.8s">Dominar el vocabulario de WordPress</div>
+  <div class="a nm r" style="--d:2.1s">Xiang Su Liu, Darío Salas, Leire Portilla, José María y Mateo Montano</div>
+</section>
+
+<div class="foot" id="foot"><span>UT04 · 4.4 WordPress</span><span id="pg"></span></div>
+<div class="wipe" id="wipe"><b id="wn"></b></div>
+</div>
+</div>
+
+<div class="ctl" id="ctl" role="toolbar" aria-label="Controles de la presentación">
+  <button id="bp" aria-label="Diapositiva anterior">‹ Anterior</button>
+  <button id="bn" aria-label="Diapositiva siguiente">Siguiente ›</button>
+  <button id="bo" aria-label="Notas del orador">Notas</button>
+  <button id="bf" aria-label="Pantalla completa">Pantalla completa</button>
+</div>
+<div class="notes" id="notes" aria-live="polite"></div>
+
+<script>
+(function(){
+  var NOTES=[
+    "Presentamos el punto 4.4 de la UT04: qué hacer justo después de instalar WordPress. Cada parte tiene teoría y la práctica que hemos hecho en nuestra propia instalación local.",
+    "Cada integrante presenta una parte con tres diapositivas: la teoría y la práctica en nuestra instalación local. Empieza Darío con la instalación y los ajustes básicos.",
+    "Con Apache y MySQL arrancados en XAMPP, creamos la base de datos en phpMyAdmin, copiamos WordPress a htdocs y seguimos el asistente. Los datos de conexión se guardan en wp-config.php. WordPress avisa de que la contraseña es muy débil: en un servidor real usaríamos otro usuario y una contraseña larga.",
+    "El punto 4.4 empieza aquí: antes de crear contenido o elegir diseño se revisan los ajustes base. La casilla Cualquiera puede registrarse solo se activa en tiendas o comunidades.",
+    "Escritura decide la categoría que recibe una entrada si no le asignamos ninguna. En Medios, WordPress crea copias en miniatura (150x150), medio (300x300) y grande (1024x1024) para no cargar la web con la imagen original.",
+    "Olvidar desmarcar la casilla de visibilidad al lanzar la web bloquea el posicionamiento en Google: es un error muy común.",
+    "Ajustes de comentarios: controlan la interacción con los lectores. Combinando las tres opciones evitamos spam y mensajes no deseados.",
+    "Al guardar este ajuste, WordPress reescribe el archivo .htaccess. Por eso también sirve para arreglar los errores 404 y 500 de la parte 3.",
+    "Tres bloques según el origen: base de datos y código (las dos primeras), rutas y servidor (500 y 404) y permisos y SSL (las dos últimas). Permisos y bucle HTTPS no se pueden reproducir en XAMPP sobre Windows, por eso solo los explicamos.",
+    "Lo provocamos en nuestra instalación. Si MySQL está parado o la contraseña de wp-config.php no coincide, aparece este mensaje en cualquier página del sitio.",
+    "Esta incidencia no la provocamos: nos pasó de verdad. Es otra causa del error de conexión de la diapositiva anterior: el servidor MySQL caído.",
+    "El Escritorio solo se ve en el panel. La barra negra aparece también en la web pública cuando el administrador tiene la sesión iniciada, con accesos como Editar sitio o + Añadir.",
+    "Se editan igual, pero tienen funciones opuestas. En nuestra instalación hay una entrada (¡Hola, mundo!, en Sin categoría) y dos páginas (Página de ejemplo y Política de privacidad en borrador).",
+    "Las categorías son como el índice de un libro; las etiquetas, palabras clave transversales. Gutenberg es el editor nativo desde WordPress 5.",
+    "WordPress trae tres temas de bloques: Twenty Twenty-Five, Four y Three. En estos temas no existen las pantallas clásicas de Menús y Widgets; se editan desde el editor del sitio.",
+    "Un plugin añade funciones que WordPress no trae de fábrica. Se instalan desde Plugins › Añadir nuevo plugin. Conviene instalar solo los necesarios: un plugin con fallos es una causa típica de la pantalla blanca.",
+    "Cinco niveles para proteger el sitio. La buena práctica es dar a cada persona el rol mínimo que necesita: un redactor en prácticas sería Colaborador, no Administrador.",
+    "Cerramos con las cuatro ideas: instalar en local, revisar los ajustes antes de publicar, saber leer y arreglar los errores típicos y conocer los términos básicos. Turno de preguntas."
+  ];
+  var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var stage=$('#stage'), fit=$('#fit'), slides=$$('.slide'), N=slides.length, wipe=$('#wipe'), wn=$('#wn'),
+      segs=$$('.tape .seg'), notes=$('#notes'), pg=$('#pg'), ctl=$('#ctl');
+  var cur=-1, busy=false, timers=[];
+
+  function T(f,ms){timers.push(setTimeout(f,RM?0:ms))}
+  function clearT(){timers.forEach(clearTimeout);timers=[]}
+  function typeInto(el,txt,sp){
+    if(RM){el.textContent=txt;return}
+    var i=0; el.classList.add('caret');
+    (function step(){el.textContent=txt.slice(0,++i); if(i<txt.length){timers.push(setTimeout(step,sp))}else{timers.push(setTimeout(function(){el.classList.remove('caret')},700))}})();
+  }
+  function scale(){var b=fit.getBoundingClientRect();stage.style.setProperty('--s',Math.min(b.width/1920,b.height/1080))}
+
+  function enter(i){
+    clearT(); var s=slides[i];
+    $$('.show',s).forEach(function(e){e.classList.remove('show')});
+    $$('.ty',s).forEach(function(e){e.textContent='';e.classList.remove('caret')});
+    $('#login').classList.remove('press');
+    $$('.q,.sw,.pr',s).forEach(function(e){var o=+e.dataset.o||0;T(function(){e.classList.add('show')},o)});
+    $$('.ty',s).forEach(function(e){T(function(){typeInto(e,e.dataset.text,+e.dataset.sp||50)},+e.dataset.o||0)});
+    if(i===0){T(function(){$('#login').classList.add('press')},4600)}
+    if(i===5){T(function(){var a=$('#s6a');a.textContent='Al publicar: se desmarca';a.className='ok'},4500)}
+    if(i===5){var a0=$('#s6a');a0.textContent='En desarrollo: se marca';a0.className='warn'}
+  }
+  function swap(n){
+    if(cur>=0)slides[cur].classList.remove('on');
+    cur=n; var s=slides[n]; s.classList.add('on');
+    stage.classList.toggle('nochrome',n===0||n===N-1||n===1&&false);
+    var part=+s.dataset.part||0;
+    segs.forEach(function(g,k){g.classList.toggle('act',part===k+1);g.classList.toggle('done',part>k+1)});
+    pg.textContent=(n+1<10?'0':'')+(n+1)+' / '+N;
+    notes.innerHTML='<small>Diapositiva '+(n+1)+' de '+N+'</small>'+NOTES[n];
+    try{history.replaceState(null,'','#s'+(n+1))}catch(e){}
+    enter(n);
+  }
+  function go(n){
+    if(busy||n<0||n>=N||n===cur)return;
+    if(RM||cur<0){swap(n);return}
+    busy=true; wn.textContent=(n+1<10?'0':'')+(n+1);
+    wipe.className='wipe in';
+    setTimeout(function(){swap(n);wipe.className='wipe out';setTimeout(function(){wipe.className='wipe';busy=false},580)},520);
+  }
+  function next(){go(cur+1)} function prev(){go(cur-1)}
+
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowRight'||k===' '||k==='PageDown'||k==='Enter'){e.preventDefault();next()}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace'){e.preventDefault();prev()}
+    else if(k==='Home')go(0); else if(k==='End')go(N-1);
+    else if(k==='f'||k==='F')fs(); else if(k==='n'||k==='N')notes.classList.toggle('open');
+    else if(k==='Escape')notes.classList.remove('open');
+  });
+  fit.addEventListener('click',function(e){var x=e.clientX/window.innerWidth; if(x<.3)prev(); else next()});
+  var tx=null;
+  fit.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+  fit.addEventListener('touchend',function(e){if(tx===null)return;var d=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(d)>50){d<0?next():prev()}});
+  function fs(){var d=document;if(!d.fullscreenElement){(d.documentElement.requestFullscreen||function(){}).call(d.documentElement)}else{d.exitFullscreen()}}
+  $('#bp').onclick=function(e){e.stopPropagation();prev()};
+  $('#bn').onclick=function(e){e.stopPropagation();next()};
+  $('#bo').onclick=function(e){e.stopPropagation();notes.classList.toggle('open')};
+  $('#bf').onclick=function(e){e.stopPropagation();fs()};
+  var ht; function showCtl(){ctl.classList.remove('hide');clearTimeout(ht);ht=setTimeout(function(){ctl.classList.add('hide')},3000)}
+  ['mousemove','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,showCtl,{passive:true})});
+  window.addEventListener('resize',scale);
+  scale(); showCtl();
+  var m=/^#s(\d+)$/.exec(location.hash); var start=m?Math.min(N,Math.max(1,+m[1]))-1:0;
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){swap(start)});
+  window.__go=go; window.__swap=swap;
+})();
+</script>
+</body>
+</html>
